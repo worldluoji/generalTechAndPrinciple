@@ -1,4 +1,4 @@
-1. ssh -p 50022 my@127.0.0.1
+﻿1. ssh -p 50022 my@127.0.0.1
 -p后面为端口号，my是用户名，127.0.0.1是服务器IP，回车后会输入密码
 
 2. ls -l 现实文件时会有文件的权限
@@ -33,6 +33,8 @@ df -h
    pstree 进程树，可以查看各个进程之间的关系
    ps aux 查看所有进程  ps aux|grep 'defunct' 找出所有僵尸进程
    netstat -lnp | grep 端口号的  查找对应端口号对应的进程
+   nslookup www.baidu.com 通过域名获取IP地址
+  telnet 192.168.3.6 3306 查看远程主机192.168.3.6的3306端口通不通
 
 10. kill -9 1827 
 9是表示强制尽快的意思，1827是进程ID
@@ -61,4 +63,6 @@ ping向目的主机发送ICMP Echo Request报文，等待目的主机回复ICMP 
     /etc/shadow 也记录了用户信息，与/etc/passwd中一一对应
     /etc/group 记录了有哪些用户组
     修改密码： passwd 选项 用户名
+
+18. scp a.tar root@192.168.3.5 /usr/luoji/a.tar 将当前主机的a.tar文件传送到192.168.3.5， 以root用户进行认证，回车后输入密码。
 
