@@ -1,4 +1,4 @@
-Git是目前最流行的版本控制工具，关键还是完全免费的。 大神Linus公司破解了Bitkeeper，被Bitkeeper公司状告。
+﻿Git是目前最流行的版本控制工具，关键还是完全免费的。 大神Linus公司破解了Bitkeeper，被Bitkeeper公司状告。
 一怒之下，Linus用不到两周时间就用C语言开发出了Git...只想说：卧槽。。。
 
 1. 创建Git仓库
@@ -25,8 +25,10 @@ Git创建分支、合并分支，都使用了C语言中的指针，所以效率�
    git reflog 查看记录的每一次命令
 
 7. Git的时候有可能commit提交代码后，发现这一次commit的内容是有错误的, 就要使用git reset命令。
-它有三种模式：soft, mixed, hard：
-git reset --hard 你没有git commit的内容被完全擦掉
+git reset [--hard|soft|mixed|merge|keep] [<commit>或HEAD]：将当前的分支重设(reset)到指定的<commit>或者HEAD(默认，如果不显示指定<commit>，默认是HEAD，即最新的一次提交)
+
+常用的有三种模式：soft, mixed, hard：
+git reset --hard 回退到<commit>，并且将HEAD指向<commit>
 git reset --soft 保留工作目录和暂存区中的内容，并把“重置HEAD所带来的新的差异”放进暂存区。
 “重置HEAD所带来的新的差异”即从版本C回退到版本B的两个版本之间的差异。
 git reset --mixed reset 如果不加参数，那么默认使用 --mixed 参数。它的行为是：保留工作目录，并且清空暂存区。也就是说，工作目录的修改、暂存区的内容以及由 reset 所导致的新的文件差异，都会被放进工作目录。简而言之，就是「把所有差异都混合（mixed）放在工作目录中」。
@@ -62,4 +64,4 @@ git fetch是获取远程最新分支内容到本地分支，但是不会自动me
     git push origin v1.0推送v1.0版本到远端
 
 15. git push到远程分支以后的撤回方法
-先使用git reset commitId，回到对应的版本，再重新push
+先使用git reset commitId，回到对应的版本，再强制重新push
