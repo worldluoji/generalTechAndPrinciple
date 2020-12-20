@@ -28,6 +28,14 @@ ln -s f1 f2  软链接 就像windows的快捷方式
 
 8. 查看磁盘挂载情况
 df -h
+df -T  可以查看磁盘类型
+cat /etc/fstab 查看文件系统类型为ext4:
+[root@VM-0-2-centos ~]# cat /etc/fstab
+UUID=21dbe030-aa71-4b3a-8610-3b942dd447fa            /                    ext4       noatime,acl,user_xattr 1 1
+proc                 /proc                proc       defaults              0 0
+sysfs                /sys                 sysfs      noauto                0 0
+debugfs              /sys/kernel/debug    debugfs    noauto                0 0
+devpts               /dev/pts             devpts     mode=0620,gid=5       0 0
 
 9. top -d 1 每隔1秒动态查看进程
    pstree 进程树，可以查看各个进程之间的关系
@@ -65,4 +73,6 @@ ping向目的主机发送ICMP Echo Request报文，等待目的主机回复ICMP 
     修改密码： passwd 选项 用户名
 
 18. scp a.tar root@192.168.3.5 /usr/luoji/a.tar 将当前主机的a.tar文件传送到192.168.3.5， 以root用户进行认证，回车后输入密码。
+
+19. uname -r 查看操作系统版本
 

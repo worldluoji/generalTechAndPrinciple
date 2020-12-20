@@ -161,3 +161,66 @@ swappiness(/proc/sys/vm/swappiness):  可以决定系统将会有多频繁地使
 总结一下：
 swappiness 的取值范围在 0 到 100，值为 100 的时候系统平等回收匿名内存和 Page Cache 内存；一般缺省值为 60，就是优先回收 Page Cache；即使 swappiness 为 0，也不能完全禁止 Swap 分区的使用，就是说在内存紧张的时候，也会使用 Swap 来回收匿名内存。
 需要你留意的时：对于容器来说有一点区别，当 设置memory.swappiness = 0 的时候，对匿名页的回收是始终禁止的，也就是容器始终都不会使用 Swap 空间。
+
+18. Linux两种IO模式
+Direct I/O 模式，用户进程如果要写磁盘文件，就会通过 Linux 内核的文件系统层 (filesystem) -> 块设备层 (block layer) -> 磁盘驱动 -> 磁盘硬件，这样一路下去写入磁盘。
+Buffered I/O 模式，那么用户进程只是把文件数据写到内存中（Page Cache）就返回了，而 Linux 内核自己有线程会把内存中的数据再写入到磁盘中。在 Linux 里，由于考虑到性能问题，绝大多数的应用都会使用 Buffered I/O 模式。
+
+19. Cgroup v2 相比 Cgroup v1 做的最大的变动就是一个进程属于一个控制组，而每个控制组里可以定义自己需要的多个子系统。
+Cgroup V2 里的 io 子系统就等同于 Cgroup v1 里的 blkio 子系统。
+那么，Cgroup 对进程 pid_y 的磁盘 I/O 做限制的时候，就可以考虑到进程 pid_y 写入到 Page Cache 内存的页面了，这样 buffered I/O 的磁盘限速就实现了。
+但目前即使最新版本的 Ubuntu Linux 或者 Centos Linux，仍然在使用 Cgroup v1 作为缺省的 Cgroup。打开方法就是配置一个 kernel 参数"cgroup_no_v1=blkio,memory"，这表示把 Cgroup v1 的 blkio 和 Memory 两个子系统给禁止，这样 Cgroup v2 的 io 和 Memory 这两个子系统就打开了。
+虽然 Cgroup v2 解决了 Buffered I/O 磁盘读写限速的问题，但是在现实的容器平台上也不是能够立刻使用的，还需要等待一段时间。目前从 runC、containerd 到 Kubernetes 都是刚刚开始支持 Cgroup v2，而对生产环境中原有运行 Cgroup v1 的节点要迁移转化成 Cgroup v2 需要一个过程。
+
+
+20. Memory Cgroup
+Memory Cgroup 也是 Linux Cgroups 子系统之一，它的作用是对一组进程的 Memory 使用做限制。
+Memory Cgroup 的虚拟文件系统的挂载点一般在"/sys/fs/cgroup/memory"这个目录下，这个和 CPU Cgroup 类似。
+memory.limit_in_bytes : 是每个控制组里最重要的一个参数了。这是因为一个控制组里所有进程可使用内存的最大值，就是由这个参数的值来直接限制的。
+memory.oom_control : 当控制组中的进程内存使用达到上限值时，这个参数能够决定会不会触发 OOM Killer。 1代表不发生OOM Killer, 缺省代表发生。
+memory.usage_in_bytes : 这个参数是只读的，它里面的数值是当前控制组里所有进程实际使用的内存总和。
+
+那么知道了哪个进程消耗了最大内存之后，我们就可以有针对性地对这个进程进行分析了，一般有这两种情况：
+第一种情况是这个进程本身的确需要很大的内存，这说明我们给 memory.limit_in_bytes 里的内存上限值设置小了，那么就需要增大内存的上限值。
+第二种情况是进程的代码中有 Bug，会导致内存泄漏，进程内存使用到达了 Memory Cgroup 中的上限。如果是这种情况，就需要我们具体去解决代码里的问题了。
+注意点：Memory Cgroup 只是统计了 RSS 和 Page Cache 这两部分的内存。
+
+需要你留意：当 设置memory.swappiness = 0 的时候，对匿名页的回收是始终禁止的，也就是容器始终都不会使用 Swap 空间。
+
+
+21. dirty pages
+而这些写入了数据的内存页面Page Cache，在它们没有被写入到磁盘文件之前，就被叫作 dirty pages。
+我们可以设定一个比值 A，A  =  dirty pages 的内存 / 节点可用内存 * 100%。
+
+1) dirty_background_ratio，缺省是 10%。如果比值 A 大于 dirty_background_ratio 的话，比如大于默认的 10%，内核 flush 线程就会把 dirty pages 刷到磁盘里。
+2) dirty_background_bytes，它和 dirty_background_ratio 作用相同。区别只是 dirty_background_bytes 是具体的字节数，它用来定义的是 dirty pages 内存的临界值，而不是比例值。
+这里你还要注意，dirty_background_ratio 和 dirty_background_bytes 只有一个可以起作用，如果你给其中一个赋值之后，另外一个参数就归 0 了。
+3) dirty_ratio，缺省是 20%。如果比值 A，大于参数 dirty_ratio 的值，比如大于默认设置的 20%，这时候正在执行 Buffered I/O 写文件的进程就会被阻塞住，直到它写的数据页面都写到磁盘为止。
+4) 第四个参数 dirty_bytes 与 dirty_ratio 相对应，它们的关系和 dirty_background_ratio 与 dirty_background_bytes 一样。我们给其中一个赋值后，另一个就会归零。
+5) dirty_writeback_centisecs，这个参数的值是个时间值，以百分之一秒为单位，缺省值是 500，也就是 5 秒钟。它表示每 5 秒钟会唤醒内核的 flush 线程来处理 dirty pages。
+6) dirty_expire_centisecs，这个参数的值也是一个时间值，以百分之一秒为单位，缺省值是 3000，也就是 30 秒钟。它定义了 dirty page 在内存中存放的最长时间，如果一个 dirty page 超过这里定义的时间，那么内核的 flush 线程也会把这个页面写入磁盘。
+
+进程写操作上的时间波动，只有可能是因为 dirty pages 的数量很多，已经达到了第三个参数 dirty_ratio 的值。这时执行写文件功能的进程就会被暂停，直到写文件的操作将数据页面写入磁盘，写文件的进程才能继续运行，所以进程里一次写文件数据块的操作时间会增加。
+
+写数据到 Page Cache 的时候，需要不断地去释放原有的页面，这个时间开销是最大的。造成容器中 Buffered I/O write() 不稳定的原因，正是容器在限制内存之后，Page Cache 的数量较小并且不断申请释放。
+其实这个问题也提醒了我们：在对容器做 Memory Cgroup 限制内存大小的时候，不仅要考虑容器中进程实际使用的内存量，还要考虑容器中程序 I/O 的量，合理预留足够的内存作为 Buffered I/O 的 Page Cache。
+
+22.10. Blkio Cgroup
+先理解两个指标：
+1）IOPS 是 Input/Output Operations Per Second 的简称，也就是每秒钟磁盘读写的次数，这个数值越大，当然也就表示性能越好。
+2）吞吐量（Throughput）是指每秒钟磁盘中数据的读取量，一般以 MB/s 为单位。这个读取量可以叫作吞吐量，有时候也被称为带宽（Bandwidth）。刚才我们用到的 fio 显示结果就体现了带宽。
+吞吐量 = 数据块大小 *IOPS。
+
+在 blkio Cgroup 中，有四个最主要的参数，它们可以用来限制磁盘 I/O 性能：
+blkio.throttle.read_iops_device        读磁盘IOPS限制
+blkio.throttle.read_bps_device         读磁盘吞吐量限制
+blkio.throttle.write_iops_device
+blkio.throttle.write_bps_device
+
+如果是Cgroup v1, 没有使用Direct I/O模式，那么即使我们设置了 blkio Cgroup，也根本不能限制磁盘的吞吐量了。
+因为默认是Buffered I/O （为了性能，常用）， 模式会先写Page Cache。
+Cgroup v2 相比 Cgroup v1 做的最大的变动就是一个进程属于一个控制组，而每个控制组里可以定义自己需要的多个子系统。
+Cgroup V2 里的 io 子系统就等同于 Cgroup v1 里的 blkio 子系统。
+那么，Cgroup 对进程 pid_y 的磁盘 I/O 做限制的时候，就可以考虑到进程 pid_y 写入到 Page Cache 内存的页面了，这样 buffered I/O 的磁盘限速就实现了。
+但目前即使最新版本的 Ubuntu Linux 或者 Centos Linux，仍然在使用 Cgroup v1 作为缺省的 Cgroup。打开方法就是配置一个 kernel 参数"cgroup_no_v1=blkio,memory"，这表示把 Cgroup v1 的 blkio 和 Memory 两个子系统给禁止，这样 Cgroup v2 的 io 和 Memory 这两个子系统就打开了。
+虽然 Cgroup v2 解决了 Buffered I/O 磁盘读写限速的问题，但是在现实的容器平台上也不是能够立刻使用的，还需要等待一段时间。目前从 runC、containerd 到 Kubernetes 都是刚刚开始支持 Cgroup v2，而对生产环境中原有运行 Cgroup v1 的节点要迁移转化成 Cgroup v2 需要一个过程。
