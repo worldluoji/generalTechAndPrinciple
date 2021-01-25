@@ -65,3 +65,8 @@ git fetch是获取远程最新分支内容到本地分支，但是不会自动me
 
 15. git push到远程分支以后的撤回方法
 先使用git reset commitId，回到对应的版本，再强制重新push
+
+16. git config --list
+照着下面配置完成后，你可以再试一下该命令，就会出现一系列配置信息。
+git config --global user.name  "username"  
+git config --global user.email  "email"
