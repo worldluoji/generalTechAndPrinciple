@@ -1,0 +1,27 @@
+leetcode 448
+主要是要利用数组下标，因为数组中数字为1-n。
+将所有正数作为数组下标，置对应数组值为负值。那么，仍为正数的位置即为（未出现过）消失的数字。
+
+func findDisappearedNumbers(nums []int) []int {
+    for _,num := range nums {
+        index := -1
+        if num > 0 {
+            index = num - 1
+        } else if (num < 0)  {
+            index = -1 * num - 1
+        }
+       
+        if index >= 0 && nums[index] > 0 {
+            nums[index] = -1 * nums[index]
+        }
+    }
+
+    res := []int{}
+    for i,num := range nums {
+        if (num > 0) {
+            res = append(res, i + 1)
+        }
+    }
+    
+    return res
+}
