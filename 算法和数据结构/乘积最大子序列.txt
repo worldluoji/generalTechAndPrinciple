@@ -1,0 +1,33 @@
+leetcode153题：计算乘积最大子序列
+思路，记录到第i个元素的最大乘积值和最小乘积值。如果当前值为正数，就用i-1的最大值乘以当前元素；如果负数，就当i-1的最小值乘以当前元素。注意为0的情况即可。
+class Solution {
+    public int maxProduct(int[] nums) {
+        if (nums == null) {
+            return 0;
+        }
+        int n = nums.length;
+        if (n == 1) {
+            return nums[0];
+        }
+        int[] max = new int[n];
+        int[] min = new int[n];
+        if (nums[0] > 0) {
+            max[0] = nums[0];
+            min[0] = 0;
+        } else {
+            max[0] = 0;
+            min[0] = nums[0];
+        }
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > 0) {
+                max[i] = max[i-1]==0 ? nums[i]: max[i-1]*nums[i];
+                min[i] = min[i-1]*nums[i];
+            } else {
+                max[i] = min[i-1]*nums[i];
+                min[i] = max[i-1]==0 ? nums[i]:max[i-1]*nums[i];
+            }
+        }
+        int maxProduct = Arrays.stream(max).max().getAsInt();
+        return maxProduct;
+    }
+}

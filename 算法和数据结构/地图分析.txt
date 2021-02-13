@@ -1,0 +1,130 @@
+leetcode 1162
+你现在手里有一份大小为 N x N 的『地图』（网格） grid，上面的每个『区域』（单元格）都用 0 和 1 标记好了。其中 0 代表海洋，1代表陆地。求离陆地最远的海洋，距离是多少？（只能上下左右移动）
+解法1：从每个海洋开始，BFS找最近的陆地，计算其距离, 最后最大的那个就是结果。
+这样能通过34个用例，还有1个性能用例通过不了，代码如下：
+class MPoint {
+    int x;
+    int y;
+    int n;
+    public MPoint(int x, int y, int n) {
+        this.x = x;
+        this.y = y;
+        this.n = n;
+    }
+    
+    public MPoint moveUp() {
+        if (this.x >= 1) {
+            return new MPoint(x-1, y, n);
+        }
+        return null;
+    }
+    
+    public MPoint moveDown() {
+        if (this.x + 1 < n) {
+            return new MPoint(x+1, y, n);
+        }
+        return null;
+    }
+    
+    public MPoint moveLeft() {
+        if (this.y >= 1) {
+            return new MPoint(x, y-1, n);
+        }
+        return null;
+    }
+    
+    public MPoint moveRight() {
+        if (this.y + 1 < n) {
+            return new MPoint(x, y+1, n);
+        }
+        return null;
+    }
+}
+
+class Solution {
+    private int bfs(MPoint mPoint, int[][] grid) {
+        List<MPoint> queue = new ArrayList<>();
+        int n = grid.length;
+        boolean[][] visited = new boolean[n][n];
+        queue.add(mPoint);
+        int nearest = 0;
+        while (!queue.isEmpty()) {
+            List<MPoint> nextLevel =  new ArrayList<>();
+            for (MPoint point:queue) {
+                MPoint pointUp = point.moveUp();
+                if (pointUp != null) {
+                    if (grid[pointUp.x][pointUp.y] == 1) {
+                        nearest += 1;
+                        return nearest;
+                    } else if (!visited[pointUp.x][pointUp.y]) {
+                        nextLevel.add(pointUp);
+                        visited[pointUp.x][pointUp.y] = true;
+                    }
+                }
+                
+                MPoint pointDown = point.moveDown();
+                if (pointDown != null) {
+                    if (grid[pointDown.x][pointDown.y] == 1) {
+                        nearest += 1;
+                        return nearest;
+                    } else if (!visited[pointDown.x][pointDown.y]) {
+                        nextLevel.add(pointDown);
+                        visited[pointDown.x][pointDown.y] = true;
+                    }
+                }
+                
+                MPoint pointLeft = point.moveLeft();
+                if (pointLeft != null) {
+                    if (grid[pointLeft.x][pointLeft.y] == 1) {
+                        nearest += 1;
+                        return nearest;
+                    } else if (!visited[pointLeft.x][pointLeft.y]) {
+                        nextLevel.add(pointLeft);
+                        visited[pointLeft.x][pointLeft.y] = true;
+                    }
+                }
+                
+                MPoint pointRight = point.moveRight();
+                if (pointRight != null) {
+                    if (grid[pointRight.x][pointRight.y] == 1) {
+                        nearest += 1;
+                        return nearest;
+                    } else if (!visited[pointRight.x][pointRight.y]) {
+                        nextLevel.add(pointRight);
+                        visited[pointRight.x][pointRight.y] = true;
+                    }
+                }   
+            }
+            nearest += 1;
+            queue.clear();
+            queue.addAll(nextLevel);
+        }
+        return -1;
+    }
+    public int maxDistance(int[][] grid) {
+        if (grid == null) {
+            return -1;
+        }
+        int n = grid.length;
+        List<MPoint> oceanPointList = new ArrayList<>();
+        for (int i=0;i<n;i++) {
+            for (int j=0;j<n;j++) {
+                if (grid[i][j] == 0) {
+                    oceanPointList.add(new MPoint(i,j,n));
+                }
+            }
+        }
+        int oceans = oceanPointList.size();
+        if (oceans == 0 || oceans == n*n) {
+            return -1;
+        }
+        int maxPath = 0;
+        for (MPoint mPoint : oceanPointList) {
+            int max = bfs(mPoint, grid);
+            if (max > maxPath) {
+                maxPath = max;
+            }
+        }
+        return maxPath;
+    }
+}

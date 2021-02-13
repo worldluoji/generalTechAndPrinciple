@@ -1,0 +1,56 @@
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+解法1：找前继节点，前继节点的值一定比当前节点值小，否则就不是二叉搜索树
+class Solution {
+    private TreeNode pre = null;
+    private boolean dfs(TreeNode node) {
+        if (node == null) {
+            return true;
+        }
+        if (!dfs(node.left)) {
+            return false;
+        }
+        if (pre != null && pre.val >= node.val) {
+            return false;
+        }
+        this.pre = node;
+        return dfs(node.right);
+    }
+    
+    public boolean isValidBST(TreeNode root) {
+        if (root == null) {
+            return true;
+        }
+        return dfs(root);
+    }
+}
+
+解法2：当前节点不能比最小的节点小，也不能比最大的节点大。
+class Solution {
+    private TreeNode pre = null;
+    private boolean dfs(TreeNode node, Integer min, Integer max) {
+        if (node == null) {
+            return true;
+        }
+        if (min != null && node.val <= min ) {
+            return false;
+        }
+        if (max != null && node.val >= max) {
+            return false;
+        }
+        // 对于左子树来说，最大值就是当前节点的值；对于右子树来说，最小值就是当前节点值
+        return dfs(node.left, min, node.val) && dfs(node.right, node.val, max);
+      
+    }
+    
+    public boolean isValidBST(TreeNode root) {
+        return dfs(root, null, null);
+    }
+}

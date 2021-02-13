@@ -1,0 +1,39 @@
+leetcode50题：求解pow(x,n) 注意使用分支，而且不能使用递归，否则会超时
+还要注意n是最小值-2147483648的情况，不能直接对n取反，因为正数最大时2147483647,取反就变成1了。
+class Solution {
+    public double myPow(double x, int n) {
+        if (n == 0) {
+            return 1;
+        }
+        int f = n < 0?-1:1;
+        boolean isMinValue = false;
+        if (n == Integer.MIN_VALUE) {
+            n = Integer.MAX_VALUE;
+            isMinValue = true;
+        } else {
+            n = n*f;
+        }
+      
+        List<Boolean> isOddList = new ArrayList<>();
+        while (n > 1) {
+            if (n % 2 == 0) {
+                isOddList.add(false);
+            } else {
+                isOddList.add(true);
+            }
+            n = n/2;
+        }
+        double y = x;
+        Collections.reverse(isOddList);
+        for (Boolean isOdd:isOddList) {
+            y *= y;
+            if (isOdd) {
+                y *= x;
+            }
+        }
+        if (!isMinValue) { 
+            return f==1?y:1/y;
+        }
+        return x/y;
+    }
+}

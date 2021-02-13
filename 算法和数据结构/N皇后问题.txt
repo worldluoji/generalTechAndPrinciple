@@ -1,0 +1,64 @@
+leetcode51.N皇后问题
+思路：按行去递归（即深一层，行数+1），递归中，去遍历列，使得选取的不能同行，同列和对角线。等到深度和行数n一样时，就找到一组解。
+class Solution {
+    private List<List<Integer>> result = new ArrayList<>();
+    private Set<Integer> cols = new HashSet<>();
+    private Set<Integer> pie = new HashSet<>();
+    private Set<Integer> na = new HashSet<>();
+    private int n;
+    private void dfs(List<Integer> oneResult, int row) {
+        if (oneResult.size() == n) {
+            List<Integer> res = new ArrayList<>();
+            res.addAll(oneResult);
+            result.add(res);
+            return;
+        }
+        for (int j = 0; j < n; j++) {
+            if (!cols.contains(j) && !pie.contains(row+j) && !na.contains(row-j)) {
+                oneResult.add(j);
+                cols.add(j);
+                pie.add(row+j);
+                na.add(row-j);
+                dfs(oneResult, row+1);
+                cols.remove(j);
+                pie.remove(row+j);
+                na.remove(row-j);
+                oneResult.remove(row);
+            }
+        }
+    }
+    public List<List<String>> solveNQueens(int n) {
+        if (n == 0) {
+            return new ArrayList<List<String>>();
+        }
+        result.clear();
+        pie.clear();
+        na.clear();
+        cols.clear();
+        this.n = n;
+        // 记录1-n行皇后在哪个位置Integer
+        List<Integer> oneResult = new ArrayList<>();
+        dfs(oneResult, 0);
+        return getFinalResult();
+    }
+    
+    private List<List<String>> getFinalResult() {
+        List<List<String>> finalResult = new ArrayList<>();
+        for (List<Integer> lst : result) {
+            List<String> item = new ArrayList<>();
+            for (Integer val:lst) {
+                StringBuilder builder = new StringBuilder();
+                for (int j=0;j<n;j++) {
+                    if (j == val) {
+                        builder.append("Q");
+                    } else {
+                        builder.append(".");
+                    }
+                }
+                item.add(builder.toString());
+            }
+            finalResult.add(item);
+        }
+        return finalResult;
+    }
+}

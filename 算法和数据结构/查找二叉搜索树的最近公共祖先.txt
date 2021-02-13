@@ -1,0 +1,30 @@
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        // 当前节点和其中一个节点相等说明它就是公共祖先
+        if (root == null || root == p || root == q) {
+            return root;
+        }
+        TreeNode leftNode = lowestCommonAncestor(root.left,p,q);
+        TreeNode rightNode = lowestCommonAncestor(root.right,p,q);
+        if (leftNode == null) {
+            return rightNode;
+        }
+        if (rightNode == null) {
+            return leftNode;
+        }
+        // 说明在root节点的左右两边找到了，root节点就是公共最先
+        if (leftNode != null && rightNode != null) {
+            return root;
+        }
+        return null;
+    }
+}

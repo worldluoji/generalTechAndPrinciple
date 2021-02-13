@@ -1,0 +1,30 @@
+leetcode 146题：实现一个LRU缓存。思路直接利用LinkedHashMap, 
+覆写其 removeEldestEntry(Map.Entry eldest) 方法，在超过总长度时删除最不常用的一个元素。
+如果不用LinkedHashMap， 则需想办法记录元素的使用次数。每次加入时移除最少使用的那个。
+import java.util.*;
+class LRUCache extends LinkedHashMap<Integer,Integer>{
+    private int maxNum;
+    public LRUCache(int capacity) {
+        super(capacity, 0.75f, true);
+        this.maxNum = capacity;
+    }
+    
+    public int get(int key) {
+        return super.getOrDefault(key, -1);
+    }
+    
+    public void put(int key, int value) {
+        super.put(key, value);
+    }
+    
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+        return size() > maxNum;
+    }
+}
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */

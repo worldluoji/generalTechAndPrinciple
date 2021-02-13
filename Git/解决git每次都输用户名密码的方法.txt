@@ -1,5 +1,9 @@
-git每次提交都输用户名和密码的解决方法:
+1. git每次提交都输用户名和密码的解决方法:
 git config  credential.helper store                                             
 这里没有--global意思是指只对这个仓库生效，建议以后都不要加--global
 让代码配置以仓库为单位存储就好，设置成全局不灵活。
 设置完成后的第一次push输入用户名和密码后，后续就不用再输入了。
+
+2. 如果用户名和邮箱都配置正确了，报错logon failed
+git update-git-for-windows
+更新一下git版本。可能是因为git版本太老了。
