@@ -1,0 +1,46 @@
+leetcode 647 :
+给定一个字符串，你的任务是计算这个字符串中有多少个回文子串。
+具有不同开始位置或结束位置的子串，即使是由相同的字符组成，也会被视作不同的子串。
+
+示例 1：
+
+输入："abc"
+输出：3
+解释：三个回文子串: "a", "b", "c"
+示例 2：
+
+输入："aaa"
+输出：6
+解释：6个回文子串: "a", "a", "a", "aa", "aa", "aaa"
+
+思路：dp[i][j]表示i到j区间是否为回文子串，假如dp[i][j]是的话，那么应该满足条件dp[i+1][j-1]也是会回文，并且s[i] == s[j]，于是乎便得到了状态转移方程，对于长度小于3时需要另做判断，dp应该枚举长度，因为dp需要保证前一个状态是确定的，那么我们只能将长度从1枚举至n，这样长度较短的状态便是确定的。
+
+
+func countSubstrings(s string) int {
+    lenS := len(s)
+    if lenS <= 1 {
+        return lenS
+    }
+    res := 0
+    dp := make([][]bool, lenS)
+    for i := 0;i < lenS; i++ {
+        dp[i] = make([]bool, lenS)
+    }
+    for l := 0; l < lenS; l++ {
+       for k := 0; k + l < lenS; k++ {
+           if l <= 2 && s[k] == s[k + l] {
+               // a, aa, aba都是回文
+               dp[k][k + l] = true
+               res = res + 1
+           } else {
+               // 如果两端相等，并且中间是回文，那么它也是回文
+               if s[k] == s[k + l] && dp[k+1][k+l-1] {
+                    dp[k][k + l] = true
+                    res = res + 1
+               }
+           }
+       }
+    }
+
+    return res
+}
