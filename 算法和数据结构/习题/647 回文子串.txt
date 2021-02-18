@@ -44,3 +44,5 @@ func countSubstrings(s string) int {
 
     return res
 }
+
+类似的题目还有 5.最长回文子串， dp的二维数组也可优化为用1维数组来模拟。
