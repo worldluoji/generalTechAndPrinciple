@@ -1,0 +1,34 @@
+[root@VM-0-2-centos ~]# ifconfig
+docker0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.18.0.1  netmask 255.255.0.0  broadcast 172.18.255.255
+        inet6 fe80::42:ccff:fe84:b2e1  prefixlen 64  scopeid 0x20<link>
+        ether 02:42:cc:84:b2:e1  txqueuelen 0  (Ethernet)
+        RX packets 29451199  bytes 2006783109 (1.8 GiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 29625513  bytes 9084167457 (8.4 GiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+就以机器上的docker0网桥来说明一下。
+UP,BROADCAST,RUNNING,MULTICAST
+UP 表示网卡处于启动的状态；
+BROADCAST 表示这个网卡有广播地址，可以发送广播包；
+MULTICAST 表示网卡可以发送多播包；
+有时候还会看到LOWER_UP ，它表示 L1 是启动的，也即网线插着呢。
+以上统称为net_device flags，网络设备的状态标识。
+
+MTU1500 是指MAC层，最大传输单元 MTU为 1500，这是以太网的默认值。
+
+接下来就是ipv4地址，子网掩码，广播地址；再接着是ipv6相关的信息；
+ether一行表示mac地址。
+
+
+有时候还会看到qdisc pfifo_fast 
+qdisc 全称是 queueing discipline，中文叫排队规则。
+内核如果需要通过某个网络接口发送数据包，它都需要按照为这个接口配置的 qdisc（排队规则）把数据包加入队列。
+
+最简单的 qdisc 是 pfifo，它不对进入的数据包做任何的处理，数据包采用先入先出的方式通过队列。
+常用的是 pfifo_fast，它的队列包括三个波段（band）。在每个波段里面，使用先进先出规则。
+三个波段（band）的优先级不相同。band 0 的优先级最高，band 2 的最低。
+如果 band 0 里面有数据包，系统就不会处理 band 1 里面的数据包，band 1 和 band 2 之间也是一样。
+数据包是按照服务类型（Type of Service，TOS）被分配到三个波段（band）里面的。
+TOS 是 IP 头里面的一个字段，代表了当前的包是高优先级的，还是低优先级的。
