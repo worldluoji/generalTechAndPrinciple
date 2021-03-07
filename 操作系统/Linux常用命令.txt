@@ -74,5 +74,12 @@ ping向目的主机发送ICMP Echo Request报文，等待目的主机回复ICMP 
 
 18. scp a.tar root@192.168.3.5 /usr/luoji/a.tar 将当前主机的a.tar文件传送到192.168.3.5， 以root用户进行认证，回车后输入密码。
 
-19. uname -r 查看操作系统版本
+19. uname -r 查看操作系统内核版本
+cat /etc/issue 查看操作系统版本，比如rethat 6.7
+
+20. tcpdump 抓包
+wireshark只能用于可视化操作系统抓包。linux服务器上就要使用tcpdump.
+
+21. curl
+用于发起http请求
 
