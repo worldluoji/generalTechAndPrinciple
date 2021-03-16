@@ -74,5 +74,49 @@ ping向目的主机发送ICMP Echo Request报文，等待目的主机回复ICMP 
 
 18. scp a.tar root@192.168.3.5 /usr/luoji/a.tar 将当前主机的a.tar文件传送到192.168.3.5， 以root用户进行认证，回车后输入密码。
 
-19. uname -r 查看操作系统版本
+19. uname -r 查看操作系统内核版本
+cat /etc/issue 查看操作系统版本，比如rethat 6.7
+
+20. tcpdump 抓包
+wireshark只能用于可视化操作系统抓包。linux服务器上就要使用tcpdump.
+
+21. curl 用于发起http请求
+curl host -H 选项：
+curl www.baidu.com -H 'Accept-Encoding: gzip'
+
+22. Centos安装软件 yum install -y
+Ubuntu安装软件 apt-get install 
+
+23. telnet www.sina.com.cn 80  连接新浪的80端口，可以用来检测端口是否通。
+连通后，可发起请求，例：
+[root@VM-0-2-centos ~]# telnet www.sina.com.cn 80
+Trying 218.94.207.212...
+Connected to www.sina.com.cn.
+Escape character is '^]'.
+GET / HTTP/1.1
+HOST: www.sina.com.cn
+
+HTTP/1.1 302 Found
+Server: Tengine
+Date: Sat, 13 Mar 2021 05:13:22 GMT
+Content-Type: text/html
+Content-Length: 258
+Connection: keep-alive
+Location: https://www.sina.com.cn/
+X-DSL-CHECK: 5
+X-Via-CDN: f=alicdn,s=cache6.cn2568,c=81.69.35.88;
+Via: cache6.cn2568[,0]
+Timing-Allow-Origin: *
+EagleId: da5ecf8816156124025865364e
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html>
+<head><title>302 Found</title></head>
+<body bgcolor="white">
+<h1>302 Found</h1>
+<p>The requested resource resides temporarily under a different URI.</p>
+<hr/>Powered by Tengine</body>
+</html>
+返回了302重定向到https
+
 
