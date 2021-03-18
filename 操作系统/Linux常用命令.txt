@@ -84,8 +84,8 @@ wireshark只能用于可视化操作系统抓包。linux服务器上就要使用
 curl host -H 选项：
 curl www.baidu.com -H 'Accept-Encoding: gzip'
 
-22. Centos安装软件 yum install -y
-Ubuntu安装软件 apt-get install 
+22. Centos安装软件 yum install -y     查看某个软件的包有哪些：yum list | grep java-11
+Ubuntu安装软件 apt-get install
 
 23. telnet www.sina.com.cn 80  连接新浪的80端口，可以用来检测端口是否通。
 连通后，可发起请求，例：
@@ -119,4 +119,29 @@ EagleId: da5ecf8816156124025865364e
 </html>
 返回了302重定向到https
 
+24.  后台运行命令：nohup
+nohup命令：nohup是不挂断的意思( no hang up)。如果你正在运行一个进程，而且你觉得在退出帐户时该进程还不会结束，
+那么可以使用nohup命令。该命令忽略所有挂（SIGHUP）信号，可以在你退出帐户/关闭终端之后继续运行相应的进程。
+该命令的一般格式为：
+nohup yourcommand &
+# yourcommand:启动对象命令。可以跟该命令需要的各种参数。
+# &是指在后台运行，但当用户推出(挂起)的时候，命令自动也跟着退出. nohup与&结合起来，可以实现不挂断的后台运行。
+实现屏幕输出记录到日志文件
+nohup yourcommand 2>&1 &
+# 0 – stdin (standard input)，1 – stdout (standard output)，2 – stderr (standard error) ；
+# 2>&1是将标准错误（2）重定向到标准输出（&1），标准输出（&1）再被重定向输入到日志文件中。
+
+如果希望将日志输出到别的文件中，可以增加一个文件路径参数。如下：
+nohup yourcommand > myout.log 2>&1 &
+其中myout.log是保存输出的文件名称；
+
+
+25. 实时监测日志输出内容命令：tail
+tail 命令是nohup命令的好搭档。配合-f参数，可以实时监视向日志文件增加的信息。
+tail -f myout.log
+tail -f 等同于–follow=descriptor，根据文件描述符进行追踪，当文件改名或被删除，追踪停止
+tail -F 等同于–follow=name --retry，根据文件名进行追踪，并保持重试，即该文件被删除或改名后，
+如果再次创建相同的文件名，会继续追踪。
+tailf 等同于tail -f -n 10，与tail -f不同的是，如果文件不增长，它不会去访问磁盘文件，
+所以tailf特别适合那些便携机上跟踪日志文件，因为它减少了磁盘访问，可以省电。
 
