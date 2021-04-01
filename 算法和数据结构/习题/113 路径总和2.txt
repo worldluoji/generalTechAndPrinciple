@@ -1,0 +1,43 @@
+给你二叉树的根节点 root 和一个整数目标和 targetSum ，找出所有 从根节点到叶子节点 路径总和等于给定目标和的路径。
+思路：叶子节点的条件是左右节点都是nil， 递归每次剪掉当前节点的Val, 每次到叶子节点时，判断targetSum是否和叶子节点的Val相等。
+注意copy的用法，以及指向数组的指针，一维二维的使用。
+
+/**
+ * Definition for a binary tree node.
+ * type TreeNode struct {
+ *     Val int
+ *     Left *TreeNode
+ *     Right *TreeNode
+ * }
+ */
+func pathSum(root *TreeNode, targetSum int) [][]int {
+    res := [][]int{}
+    r := []int{}
+    dfs(root, targetSum, &r, &res)
+    return res
+}
+
+func dfs(node *TreeNode, targetSum int, r *[]int, res *[][]int) {
+    if node == nil {
+        return
+    }
+    if node.Left == nil && node.Right == nil {
+        if node.Val == targetSum {
+            lenOfNums := len(*r) + 1
+            tmp := make([]int, lenOfNums)
+            copy(tmp, *r)
+            tmp[lenOfNums - 1] = targetSum
+            *res = append(*res, tmp)
+        }
+        return
+    }
+    *r = append(*r, node.Val)
+    layer := len(*r)
+    newTarget := targetSum - node.Val
+    dfs(node.Left, newTarget, r, res)
+    if node.Right != nil {
+        *r = (*r)[:layer]
+        dfs(node.Right, newTarget, r, res)
+    }
+    
+}
