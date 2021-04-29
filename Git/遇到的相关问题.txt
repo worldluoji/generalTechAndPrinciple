@@ -8,3 +8,9 @@
 -f -----强制运行
 
 建议使用 git clean -d -f
+
+2. fatal: refusing to merge unrelated histories
+如果你是git pull或者git push报fatal: refusing to merge unrelated histories
+同理：
+git pull origin master --allow-unrelated-histories
+如果有冲突，再解决冲突后提交即可。
