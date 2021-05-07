@@ -4,7 +4,7 @@
 解释：在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。
      注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格；同时，你不能在买入前卖出股票
 
-思路: 当天买卖利润肯定为0，所以最大利润一定不会小于0，至少都是0。 当天的最大利润 =  max{昨天的最大利润 + 当天的价格  - 昨天价格, 0}
+思路: 当天买卖利润肯定为0，所以最大利润一定不会小于0，至少都是0。 当天卖出可获取的最大利润 =  max{昨天卖出可获取的最大利润 + 当天的价格  - 昨天价格, 0}
 
 func maxProfit(prices []int) int {
     // 前一天卖出可获得的最大利润
@@ -48,3 +48,95 @@ func maxProfit(prices []int) int {
     return dp[n - 1]
 }
 
+
+
+买卖股票的最佳时机 Ⅲ: 限制只能进行两次交易
+立刻想到了分治，因为Ⅰ已经可以计算出买卖一次的最大利润，那么分成两块计算：
+
+func maxProfit(prices []int) int {
+   n := len(prices)
+   max := 0
+   for  i:= 0; i < n; i++ {
+       var sum1 = 0
+       var sum2 = 0
+       if i > 0 {
+           sum1 = oneMaxProfit(prices[0:i])
+       }
+       sum2 = oneMaxProfit(prices[i:])
+       temp := sum1 + sum2
+       if temp > max {
+           max = temp
+       }
+   }
+   return max
+}
+
+func oneMaxProfit(prices []int) int {
+    if len(prices) == 0 {
+        return 0
+    }
+    // 前一天卖出可获得的最大利润
+    lastDayProfit := 0
+    profit := 0
+    for i:=1;i<len(prices);i++ {
+       temp := prices[i] - prices[i - 1] + lastDayProfit
+       if temp > 0 {
+           lastDayProfit = temp
+           if temp > profit {
+               profit = temp
+           }
+       } else {
+           lastDayProfit = 0
+       }
+    }
+    return profit
+}
+
+但是上面的方法超时了，优化后：
+
+func maxProfit(prices []int) int {
+    n := len(prices)
+    if n < 2 {
+        return 0
+    }
+    // dp1[i]表示前i天可以获得的最大利润，dp2[i]表示第i天到最后1天可以获得的最大利润
+    dp1 := make([]int, n)
+    dp2 := make([]int, n)
+    dp1[0] = 0
+    dp2[0] = 0
+    min := prices[0]
+    max := prices[n-1]
+    for i:=1;i<n;i++ {
+        temp := prices[i] - min
+        if temp > dp1[i-1] {
+            dp1[i] = temp
+        } else {
+            dp1[i] = dp1[i-1]
+        }
+        if min > prices[i] {
+            min = prices[i]
+        }
+    }
+
+     for i:=n-2;i>=0;i-- {
+        temp := max - prices[i]
+        if temp > dp2[i+1] {
+            dp2[i] = temp
+        } else {
+            dp2[i] = dp2[i+1]
+        }
+        if max < prices[i] {
+            max = prices[i]
+        }
+    }
+
+    max = 0
+    for i:=0;i<n;i++ {
+        dp1[i] += dp2[i]
+        if dp1[i] > max {
+            max = dp1[i]
+        }    
+    }
+    return max
+
+}
