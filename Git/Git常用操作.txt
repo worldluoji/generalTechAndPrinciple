@@ -19,6 +19,8 @@ Git创建分支、合并分支，都使用了C语言中的指针，所以效率�
               git diff --cached fileName 比较暂存区与版本库上文件的区别，把暂存区理解为一个cache即好记忆
               git diff HEAD --fileName 比较工作区与版本库上当前版本（HEAD）的区别
 
+git diff commit1 commit2  比较两次提交的差异
+
 
 6. git log 查看提交历史
    git log --graph可以查看合并分支图
