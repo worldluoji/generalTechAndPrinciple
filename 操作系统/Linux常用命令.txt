@@ -151,4 +151,13 @@ tailf 等同于tail -f -n 10，与tail -f不同的是，如果文件不增长，
 26. top命令中的Cpu(s)和%CPU
 Cpu(s)表示的是 所有用户进程占用整个cpu的平均值，由于每个核心占用的百分比不同，所以按平均值来算比较有参考意义。而%CPU显示的是进程占用一个核的百分比，而不是整个cpu（12核）的百分比，有时候可能大于100，那是因为该进程启用了多线程占用了多个核心，所以有时候我们看该值得时候会超过100%，但不会超过总核数*100
 
+27. systemctl
+systemctl list-units            ##列出当前系统服务的状态
+systemctl status kubelet           ##查看指定服务的状态
+systemctl stop kubelet             ##关闭指定服务
+systemctl start kubelet          ##开启指定服务
+systemctl restart kubelet          ##从新启动服务
+systemctl enable kubelet          ##设定指定服务开机开启
+systemctl disable kubelet          ##设定指定服务开机关闭
+
 
