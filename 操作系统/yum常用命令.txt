@@ -17,3 +17,7 @@ yum clean packages: 清除缓存目录下的软件包
 yum clean headers: 清除缓存目录下的 headers
 yum clean oldheaders: 清除缓存目录下旧的 headers
 yum clean, yum clean all (= yum clean packages; yum clean oldheaders) :清除缓存目录下的软件包及旧的 headers
+
+
+9. 查找所有可用版本并排序
+yum list docker-ce --showduplicates | sort -r
