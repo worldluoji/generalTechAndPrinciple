@@ -160,4 +160,12 @@ systemctl restart kubelet          ##从新启动服务
 systemctl enable kubelet          ##设定指定服务开机开启
 systemctl disable kubelet          ##设定指定服务开机关闭
 
+28. lsblk
+查看挂载的磁盘
+[root@kube-master ~]# lsblk
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sr0     11:0    1 41.2M  0 rom  
+vda    253:0    0   50G  0 disk 
+└─vda1 253:1    0   50G  0 part /
+vdb    253:16   0  100G  0 disk 
 
