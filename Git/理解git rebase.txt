@@ -18,6 +18,7 @@ git commit --amend -m 'new commit message' # 直接修改上一次 commit
 
 
 二. 使用rebase操作
+如果我们想修改的 Commit Message 不是最近一次的 Commit Message，可以通过 git rebase -i <父 commit ID>命令来修改。
 首先说下 rebase 操作是什么，变基 (rebase) 其实是一种 merge 的操作，但是和 merge 不同的是，merge 会保留分支信息，但 rebase 是直接把修改嫁接到你想保留的分支，而把切出去的那个分支的信息全部丢掉了，这样看起来就像从未切过分支一样。
 
 例1：
@@ -109,7 +110,9 @@ f 295fadd third commit
 f b95a1b0 4th commit
 结果只剩下两个 commit，大功告成！
 
-如果想要修改 commti message，可以在这一步之后再使用 git commit --amend ，或者在上一步选择用 squash 的模式。
+如果想要修改 commti message，可以在这一步之后再使用 git commit --amend ，或者在使用r指令修改message
+# 修改 message
+# r, reword <commit> = use commit, but edit the commit message 
 
 commit 521bea075647a6e0a0d34d4f6df288bfda9353ad (HEAD -> master)
 Author: N
