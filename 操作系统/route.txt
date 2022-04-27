@@ -1,0 +1,84 @@
+Centos 添加删除路由
+
+Linux下静态路由修改命令
+
+方法一：
+
+添加路由
+
+Route add -net 192.168.0.0/24 gw 192.168.0.1
+
+Route add -host 192.168.0.1 dev 192.168.0.1
+
+删除路由
+
+route del default
+route del -net 192.168.137.0/24 gw 0.0.0.0
+
+Add 增加路由
+
+Del 删除路由
+
+-net 设置到某个网段的路由
+
+-host 设置到某台主机的路由
+
+Gw 出口网关 IP地址
+
+Dev 出口网关 物理设备名
+
+
+增加默认路由
+
+Route add default gw 192.168.0.1
+
+默认路由一条就够了
+
+Route -n 查看路由表
+
+
+方法二：
+
+添加路由
+
+Ip route add 192.168.0.0/24 via 192.168.0.1
+
+Ip route add 192.168.0.1 dev 192.168.0.1
+
+删除路由
+
+Ip route del 192.168.0.0/24 via 192.168.0.1
+
+Add 增加路由
+
+Del 删除路由
+
+Via 网关出口 IP地址
+
+Dev 网关出口 物理设备名
+
+增加默认路由
+
+Ip route add default via 192.168.0.1 dev eth0
+
+Via 192.168.0.1 是我的默认路由器
+
+查看路由信息
+
+Ip route
+
+用前面的方法添加的路由，服务器重启后就会失效，配置持久化路由需要在配置文件中配置：
+在/etc/sysconfig/network中配置默认路由
+通过GATEWAY=x.x.x.x
+
+在/etc/sysconfig/network-scripts/ifcfg-ens33中配置默认路由
+通过GATEWAY=x.x.x.x
+且该文件中的配置会覆盖上边的配置。
+
+在/etc/sysconfig/network-scripts/route-<InterfaceName>文件中配置明细路由，
+比如InterfaceName为ens33就可以这样配置：
+# /etc/sysconfig/network-scripts/route-ens33
+3.3.3.0/24 via 192.168.74.2 dev ens33
+4.4.4.0/24 via 192.168.74.2 dev ens33
+
+这就意味着，发到3.3.3.0/24网段的包，都转发到192.168.74.2 ens33设备。
