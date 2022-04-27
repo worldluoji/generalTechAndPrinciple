@@ -1,0 +1,117 @@
+cgroup 定义了下面的一系列子系统，每个子系统用于控制某一类资源。
+CPU 子系统，主要限制进程的 CPU 使用率。
+cpuacct 子系统，可以统计 cgroup 中的进程的 CPU 使用报告。
+cpuset 子系统，可以为 cgroup 中的进程分配单独的 CPU 节点或者内存节点。
+memory 子系统，可以限制进程的 Memory 使用量。
+blkio 子系统，可以限制进程的块设备 IO。
+devices 子系统，可以控制进程能够访问某些设备。
+net_cls 子系统，可以标记 cgroups 中进程的网络数据包，然后可以使用 tc 模块（traffic control）对数据包进行控制。
+freezer 子系统，可以挂起或者恢复 cgroup 中的进程。
+
+在 Linux 中，Cgroups 给用户暴露出来的操作接口是文件系统，即它以文件和目录的方式组织在操作系统的 /sys/fs/cgroup 路径下。在 Ubuntu 16.04 机器里，我可以用 mount 指令把它们展示出来，这条命令是：
+$ mount -t cgroup 
+cpuset on /sys/fs/cgroup/cpuset type cgroup (rw,nosuid,nodev,noexec,relatime,cpuset)
+cpu on /sys/fs/cgroup/cpu type cgroup (rw,nosuid,nodev,noexec,relatime,cpu)
+cpuacct on /sys/fs/cgroup/cpuacct type cgroup (rw,nosuid,nodev,noexec,relatime,cpuacct)
+blkio on /sys/fs/cgroup/blkio type cgroup (rw,nosuid,nodev,noexec,relatime,blkio)
+memory on /sys/fs/cgroup/memory type cgroup (rw,nosuid,nodev,noexec,relatime,memory)
+...
+可以看到，在 /sys/fs/cgroup 下面有很多诸如 cpuset、cpu、 memory 这样的子目录，也叫子系统。这些都是我这台机器当前可以被 Cgroups 进行限制的资源种类。
+如果看不到这些文件路径，就要自己去挂载。
+
+1) cpu Cgroup
+$ ls /sys/fs/cgroup/cpu
+cgroup.clone_children cpu.cfs_period_us cpu.rt_period_us  cpu.shares notify_on_release
+cgroup.procs      cpu.cfs_quota_us  cpu.rt_runtime_us cpu.stat  tasks
+如果熟悉 Linux CPU 管理的话，你就会在它的输出里注意到 cfs_period 和 cfs_quota 这样的关键词。
+这两个参数需要组合使用，可以用来限制进程在长度为 cfs_period 的一段时间内，只能被分配到总量为 cfs_quota 的 CPU 时间。
+
+如何使用Cgroup?
+我们现在进入 /sys/fs/cgroup/cpu 目录下：
+root@ubuntu:/sys/fs/cgroup/cpu$ mkdir container
+root@ubuntu:/sys/fs/cgroup/cpu$ ls container/
+cgroup.clone_children cpu.cfs_period_us cpu.rt_period_us  cpu.shares notify_on_release
+cgroup.procs      cpu.cfs_quota_us  cpu.rt_runtime_us cpu.stat  tasks
+这个目录就称为一个“控制组”。你会发现，操作系统会在你新创建的 container 目录下，自动生成该子系统对应的资源限制文件。
+
+我们可以通过查看 container 目录下的文件，看到 container 控制组里的 CPU quota 还没有任何限制（即：-1），CPU period 则是默认的 100  ms（100000  us）：
+$ cat /sys/fs/cgroup/cpu/container/cpu.cfs_quota_us -1
+$ cat /sys/fs/cgroup/cpu/container/cpu.cfs_period_us 100000
+接下来，我们可以通过修改这些文件的内容来设置限制。比如，向 container 组里的 cfs_quota 文件写入 20  ms（20000  us）：
+$ echo 20000 > /sys/fs/cgroup/cpu/container/cpu.cfs_quota_us
+它意味着在每 100  ms 的时间里，被该控制组限制的进程只能使用 20  ms 的 CPU 时间，也就是说这个进程只能使用到20 / 100 = 20% 的 CPU 带宽。
+接下来，我们把被限制的进程的 PID 写入 container 组里的 tasks 文件，上面的设置就会对该进程生效了：
+$ echo 226 > /sys/fs/cgroup/cpu/container/tasks 
+226进行是一个死循环
+$ while : ; do : ; done &
+[1] 226
+
+还有一个参数cpu.shares。这个值是 CPU  Cgroup 对于控制组之间的 CPU 分配比例，它的缺省值是 1024。
+假设我们前面创建的 group3 中的 cpu.shares 是 1024，而 group4 中的 cpu.shares 是 3072，那么 group3:group4=1:3。
+
+总结一下： cpu.cfs_quota_us 和 cpu.cfs_period_us 这两个值决定了每个控制组中所有进程的可使用 CPU 资源的最大值；
+cpu.shares 这个值决定了 CPU Cgroup 子系统下控制组可用 CPU 的相对比例，
+不过只有当系统上 CPU 完全被占满的时候，这个比例才会在各个控制组间起作用。
+
+Linux Cgroups 的设计还是比较易用的，简单粗暴地理解呢，它就是一个子系统目录加上一组资源限制文件的组合。
+而对于 Docker 等 Linux 容器项目来说，它们只需要在每个子系统下面，为每个容器创建一个控制组（即创建一个新目录），
+然后在启动容器进程之后，把这个进程的 PID 填写到对应控制组的 tasks 文件中就可以了。
+这也就是
+$ docker run -it --cpu-period=100000 --cpu-quota=20000 ubuntu /bin/bash
+的原理了。
+
+2) Memory Cgroup
+Memory Cgroup 也是 Linux Cgroups 子系统之一，它的作用是对一组进程的 Memory 使用做限制。
+Memory Cgroup 的虚拟文件系统的挂载点一般在"/sys/fs/cgroup/memory"这个目录下，这个和 CPU Cgroup 类似。
+memory.limit_in_bytes : 是每个控制组里最重要的一个参数了。这是因为一个控制组里所有进程可使用内存的最大值，就是由这个参数的值来直接限制的。
+memory.oom_control : 当控制组中的进程内存使用达到上限值时，这个参数能够决定会不会触发 OOM Killer。 1代表不发生OOM Killer, 缺省代表发生。
+memory.usage_in_bytes : 这个参数是只读的，它里面的数值是当前控制组里所有进程实际使用的内存总和。
+
+那么知道了哪个进程消耗了最大内存之后，我们就可以有针对性地对这个进程进行分析了，一般有这两种情况：
+第一种情况是这个进程本身的确需要很大的内存，这说明我们给 memory.limit_in_bytes 里的内存上限值设置小了，那么就需要增大内存的上限值。
+第二种情况是进程的代码中有 Bug，会导致内存泄漏，进程内存使用到达了 Memory Cgroup 中的上限。如果是这种情况，就需要我们具体去解决代码里的问题了。
+注意点：Memory Cgroup 只是统计了 RSS 和 Page Cache 这两部分的内存。
+
+需要你留意：当 设置memory.swappiness = 0 的时候，对匿名页的回收是始终禁止的，也就是容器始终都不会使用 Swap 空间。
+
+
+3) Blkio Cgroup
+先理解两个指标：
+1）IOPS 是 Input/Output Operations Per Second 的简称，也就是每秒钟磁盘读写的次数，这个数值越大，当然也就表示性能越好。
+2）吞吐量（Throughput）是指每秒钟磁盘中数据的读取量，一般以 MB/s 为单位。
+这个读取量可以叫作吞吐量，有时候也被称为带宽（Bandwidth）。刚才我们用到的 fio 显示结果就体现了带宽。
+吞吐量 = 数据块大小 *IOPS。
+
+在 blkio Cgroup 中，有四个最主要的参数，它们可以用来限制磁盘 I/O 性能：
+blkio.throttle.read_iops_device        读磁盘IOPS限制
+blkio.throttle.read_bps_device         读磁盘吞吐量限制
+blkio.throttle.write_iops_device
+blkio.throttle.write_bps_device
+
+如果是Cgroup v1, 没有使用Direct I/O模式，那么即使我们设置了 blkio Cgroup，也根本不能限制磁盘的吞吐量了。
+因为默认是Buffered I/O （为了性能，常用）， 模式会先写Page Cache。
+Cgroup v2 相比 Cgroup v1 做的最大的变动就是一个进程属于一个控制组，而每个控制组里可以定义自己需要的多个子系统。
+Cgroup V2 里的 io 子系统就等同于 Cgroup v1 里的 blkio 子系统。
+那么，Cgroup 对进程 pid_y 的磁盘 I/O 做限制的时候，就可以考虑到进程 pid_y 写入到 Page Cache 内存的页面了，这样 buffered I/O 的磁盘限速就实现了。
+但目前即使最新版本的 Ubuntu Linux 或者 Centos Linux，仍然在使用 Cgroup v1 作为缺省的 Cgroup。
+打开方法就是配置一个 kernel 参数"cgroup_no_v1=blkio,memory"，这表示把 Cgroup v1 的 blkio 和 Memory 两个子系统给禁止，
+这样 Cgroup v2 的 io 和 Memory 这两个子系统就打开了。
+虽然 Cgroup v2 解决了 Buffered I/O 磁盘读写限速的问题，但是在现实的容器平台上也不是能够立刻使用的，
+还需要等待一段时间。目前从 runC、containerd 到 Kubernetes 都是刚刚开始支持 Cgroup v2，
+而对生产环境中原有运行 Cgroup v1 的节点要迁移转化成 Cgroup v2 需要一个过程。
+
+
+关于 Cgroup v2
+Cgroup v2 相比 Cgroup v1 做的最大的变动就是一个进程属于一个控制组，
+而每个控制组里可以定义自己需要的多个子系统。
+Cgroup V2 里的 io 子系统就等同于 Cgroup v1 里的 blkio 子系统。
+那么，Cgroup 对进程 pid_y 的磁盘 I/O 做限制的时候，就可以考虑到进程 pid_y 写入到 Page Cache 内存的页面了，
+这样 buffered I/O 的磁盘限速就实现了。
+但目前即使最新版本的 Ubuntu Linux 或者 Centos Linux，仍然在使用 Cgroup v1 作为缺省的 Cgroup。
+打开方法就是配置一个 kernel 参数"cgroup_no_v1=blkio,memory"，
+这表示把 Cgroup v1 的 blkio 和 Memory 两个子系统给禁止，
+这样 Cgroup v2 的 io 和 Memory 这两个子系统就打开了。
+虽然 Cgroup v2 解决了 Buffered I/O 磁盘读写限速的问题，但是在现实的容器平台上也不是能够立刻使用的，
+还需要等待一段时间。
+目前从 runC、containerd 到 Kubernetes 都是刚刚开始支持 Cgroup v2，
+而对生产环境中原有运行 Cgroup v1 的节点要迁移转化成 Cgroup v2 需要一个过程。
