@@ -1,0 +1,19 @@
+方法一：
+修改/etc/rc.d/rc.local 或者 /etc/rc.local 。
+
+1) sudo vim /etc/rc.d/rc.local
+
+2) rc.local 写入你要运行的脚本
+......
+
+3)加入可执行属性
+chmod +x /etc/rc.d/rc.local
+
+方法二：
+修改crontab文件。
+
+在用户目录下进入crontab编辑。
+
+crontab -e
+加入如下内容
+@reboot  你要执行的命令
