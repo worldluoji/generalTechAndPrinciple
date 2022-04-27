@@ -1,0 +1,83 @@
+为了隔离不同类型的资源，Linux 内核里面实现了以下几种不同类型的 namespace。
+1）UTS，对应的宏为 CLONE_NEWUTS，表示不同的 namespace 可以配置不同的 hostname。
+2）User，对应的宏为 CLONE_NEWUSER，表示不同的 namespace 可以配置不同的用户和组。
+3）Mount，对应的宏为 CLONE_NEWNS，表示不同的 namespace 的文件系统挂载点是隔离的
+4）PID，对应的宏为 CLONE_NEWPID，表示不同的 namespace 有完全独立的 pid，
+也即一个 namespace 的进程和另一个 namespace 的进程，pid 可以是一样的，但是代表不同的进程。
+5）Network，对应的宏为 CLONE_NEWNET，表示不同的 namespace 有独立的网络协议栈。
+
+
+[root@kube-master k8s]# docker ps
+CONTAINER ID   IMAGE                                                                 COMMAND                  CREATED        STATUS        PORTS                                                                                                                                  NAMES
+0d451592be95   mysql:5.7                                                             "docker-entrypoint.s…"   2 months ago   Up 2 months   33060/tcp, 0.0.0.0:3309->3306/tcp, :::3309->3306/tcp                                                                                   mysqlNew2
+
+
+[root@kube-master k8s]# docker inspect 0d451592be95
+[
+    {
+        "Id": "0d451592be95a50681f80615d82f994ff854ad40e3248addda06400589795cdb",
+        "Created": "2022-02-24T03:26:55.529316259Z",
+        "Path": "docker-entrypoint.sh",
+        "Args": [
+            "mysqld"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 2525746,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2022-02-24T03:26:56.108857523Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+.......
+可以看到进程号为2525746
+
+[root@kube-master k8s]# ps -ef | grep 2525746
+root      160835  158895  0 15:43 pts/0    00:00:00 grep --color=auto 2525746
+polkitd  2525746 2525727  0 Feb24 ?        00:53:17 mysqld
+
+
+[root@kube-master k8s]# ls -l /proc/2525746/ns
+total 0
+lrwxrwxrwx 1 polkitd input 0 Apr 27 15:43 ipc -> ipc:[4026532453]
+lrwxrwxrwx 1 polkitd input 0 Apr 27 15:43 mnt -> mnt:[4026532451]
+lrwxrwxrwx 1 polkitd input 0 Apr 18 18:40 net -> net:[4026532456]
+lrwxrwxrwx 1 polkitd input 0 Apr 18 18:40 pid -> pid:[4026532454]
+lrwxrwxrwx 1 polkitd input 0 Apr 27 15:43 user -> user:[4026531837]
+lrwxrwxrwx 1 polkitd input 0 Apr 27 15:43 uts -> uts:[4026532452]
+
+可以看到，这个进程所属于的 6 种 namespace . 
+
+操作 namespace 的常用指令 nsenter，可以用来运行一个进程，进入指定的 namespace。
+
+
+通过下面的命令，我们可以运行 /bin/bash，并且进入 mysql 所在容器的 namespace。
+nsenter --target 2525746 --mount --uts --ipc --net --pid -- env --ignore-environment -- /bin/bash
+
+
+另一个命令是 unshare，它会离开当前的 namespace，创建且加入新的 namespace，然后执行参数中指定的命令。
+运行下面这行命令之后，pid 和 net 都进入了新的 namespace:
+unshare --mount --ipc --pid --net --mount-proc=/proc --fork /bin/bash
+
+
+我们还可以通过函数操作 namespace
+第一个函数是 clone，也就是创建一个新的进程，并把它放到新的 namespace 中
+int clone(int (*fn)(void *), void *child_stack, int flags, void *arg);
+
+第二个函数是 setns，用于将当前进程加入到已有的 namespace 中
+int setns(int fd, int nstype);
+
+第三个函数是 unshare，它可以使当前进程退出当前的 namespace，并加入到新创建的 namespace。
+int unshare(int flags);
+flags 用于指定一个或者多个上面的 CLONE_NEWUTS、CLONE_NEWUSER、CLONE_NEWNS、CLONE_NEWPID 和 CLONE_NEWNET。
+
+clone 和 unshare 的区别是，unshare 是使当前进程加入新的 namespace；clone 是创建一个新的子进程，
+然后让子进程加入新的 namespace，而当前进程保持不变。
+
+参考资料：
+https://time.geekbang.org/column/article/113692?cid=100024701
