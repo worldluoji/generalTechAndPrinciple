@@ -27,3 +27,21 @@ yum install -y kubelet-1.23.3-0
 
 10. 列出所有已安装的软件包
 yum list installed
+
+
+11.  *.so包缺失处理：
+
+[going@dev iam]$   yum  provides libstdc++.so.6
+Loaded plugins: fastestmirror, langpacks, product-id, search-disabled-repos, subscription-manager
+Determining fastest mirrors
+ * base: mirrors.aliyun.com
+ * extras: mirrors.aliyun.com
+ * updates: mirrors.aliyun.com
+kubernetes                                                                                                                                                                           797/797
+libstdc++-4.8.5-44.el7.i686 : GNU Standard C++ Library
+Repo        : base
+Matched from:
+Provides    : libstdc++.so.6
+
+
+[going@dev iam]$ sudo yum install libstdc++-4.8.5-44.el7.i686
