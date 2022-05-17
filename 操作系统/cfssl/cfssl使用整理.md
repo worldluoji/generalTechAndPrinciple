@@ -105,15 +105,15 @@ ca-config.json  ca.csr  ca-csr.json  ca-key.pem  ca.pem
 - ca.pem（根证书）
 - ca.csr（证书签名请求），用于交叉签名或重新签名
 
-## 5. 服务器生成自己的公钥（server.pub）和私钥（server.key）
+## 5. 服务器生成自己的公钥（server.pem）和私钥（server.key）
 后续通信过程中，客户端使用该公钥加密通信数据，服务端使用对应的私钥解密接收到的客户端的数据
 ```
 $ mkdir newModule
 $ cd  newModule
 
-$ tee iam-apiserver-csr.json <<EOF
+$ tee server.json <<EOF
 {
-  "CN": "iam-apiserver",
+  "CN": "server",
   "key": {
     "algo": "rsa",
     "size": 2048
@@ -121,16 +121,16 @@ $ tee iam-apiserver-csr.json <<EOF
   "names": [
     {
       "C": "CN",
-      "ST": "BeiJing",
-      "L": "BeiJing",
+      "ST": "ChengDu",
+      "L": "ChengDu",
       "O": "marmotedu",
-      "OU": "iam-apiserver"
+      "OU": "server"
     }
   ],
   "hosts": [
     "127.0.0.1",
     "localhost",
-    "iam.api.marmotedu.com"
+    "iam.server.com"
   ]
 }
 EOF
@@ -138,5 +138,5 @@ EOF
 $ cfssl gencert -ca=$../cert/ca.pem \
   -ca-key=../cert/ca-key.pem \
   -config=../cert/ca-config.json \
-  -profile=iam iam-apiserver-csr.json | cfssljson -bare iam-apiserver
+  -profile=iam server.json | cfssljson -bare server
 ```
