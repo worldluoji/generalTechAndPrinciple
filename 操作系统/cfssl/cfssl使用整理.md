@@ -102,10 +102,11 @@ ca-config.json  ca.csr  ca-csr.json  ca-key.pem  ca.pem
 
 将会生成:
 - ca-key.pem（私钥）  
-- ca.pem（证书，也就是公钥？）
+- ca.pem（根证书）
 - ca.csr（证书签名请求），用于交叉签名或重新签名
 
-## 5. 使用根证书生成其它证书及私钥
+## 5. 服务器生成自己的公钥（server.pub）和私钥（server.key）
+后续通信过程中，客户端使用该公钥加密通信数据，服务端使用对应的私钥解密接收到的客户端的数据
 ```
 $ mkdir newModule
 $ cd  newModule
