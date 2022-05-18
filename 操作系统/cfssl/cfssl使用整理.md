@@ -105,8 +105,11 @@ ca-config.json  ca.csr  ca-csr.json  ca-key.pem  ca.pem
 - ca.pem（根证书）
 - ca.csr（证书签名请求），用于交叉签名或重新签名
 
-## 5. 服务器生成自己的公钥（server.pem）和私钥（server.key）
-后续通信过程中，客户端使用该公钥加密通信数据，服务端使用对应的私钥解密接收到的客户端的数据
+可以使用certinfo命令查看证书信息：
+- cfssl certinfo -cert ca.pem # 查看 cert(证书信息)
+- cfssl certinfo -csr ca.csr # 查看 CSR(证书签名请求)信息
+
+## 5. 服务器生成自己的证书（server.pem，包含公钥）和私钥（server-key.pem）
 ```
 $ mkdir newModule
 $ cd  newModule
@@ -135,7 +138,7 @@ $ tee server.json <<EOF
 }
 EOF
 
-$ cfssl gencert -ca=$../cert/ca.pem \
+$ cfssl gencert -ca=../cert/ca.pem \
   -ca-key=../cert/ca-key.pem \
   -config=../cert/ca-config.json \
   -profile=iam server.json | cfssljson -bare server
