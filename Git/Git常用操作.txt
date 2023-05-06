@@ -43,6 +43,12 @@ git reset HEAD readmine.txt 将暂存区中的内容恢复到工作区
 1) git checkout -b test dev 基于dev分支创建test分支并切换到test分支，如果不加dev,就是基于当前分支创建
 这等价于 git branch test创建分支 + git checkout test 切换分支
 
+注意，git branch -r查看远端分支：
+origin/master
+origin/test
+...
+这时的分支名带了origin前缀，我们在git checkout时不用带origin前缀
+
 2) git checkout --fileName 丢弃工作区的文件修改，不影响库上版本和暂存区
 比如，git rm fileName删除文件后，如果是误删，就git checkout --fileName就能恢复
 
