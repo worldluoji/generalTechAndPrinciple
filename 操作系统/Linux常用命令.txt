@@ -169,3 +169,23 @@ vda    253:0    0   50G  0 disk
 └─vda1 253:1    0   50G  0 part /
 vdb    253:16   0  100G  0 disk 
 
+29. free
+free命令是检查一个 Linux 系统中内存使用率最常用的命令。它显示关于内存总量，已经使用的内存以及空闲内存的相关信息。
+
+通常, free 运行时加上-h选项，意味着以人类可读的格式打印输出：
+
+free -h
+
+              total        used        free      shared  buff/cache   available
+Mem:           3936        1087         252         130        2596        2427
+Swap:             0           0           0
+
+
+这里是每一列的意义：
+
+total - 应用可以使用的内存总数
+used - 已经被使用的内存。 它是这样计算的： used = total - free - buffers - cache
+free - 空闲的/未被使用的内存。
+shared - 这一列可以被忽略。 它仅仅用于向后兼容。
+buff/cache - 内核缓存，页面缓存和slab
+avaiable - 可用来启动新应用的估计可用内存，不包括交换内存。
