@@ -33,7 +33,7 @@ rebase把你当前最新分支与其他分支合并时候,会把其他分支的�
 
 简单来讲，合并本地其他分支，为了不产生多余的分叉及合并记录时可以使用rebase
 
-<img src="git rebase.gif" />
+<img src="./pics/git rebase.gif" />
 
 例1：基分支变更时（一般是master），重新让特性分支基于最新的基分支
 ```
