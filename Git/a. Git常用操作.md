@@ -51,7 +51,7 @@ git reset [--hard|soft|mixed|merge|keep] [<commit>或HEAD]：将当前的分支�
 ```
 
 常用的有三种模式：soft, mixed, hard：
-- git reset --hard 回退到<commit>，并且将HEAD指向<commit>
+- git reset --hard 回退到`<commit>`，并且将HEAD指向`<commit>`
 - git reset --soft 保留工作目录和暂存区中的内容，并把“重置HEAD所带来的新的差异”放进暂存区。
 “重置HEAD所带来的新的差异”即从版本C回退到版本B的两个版本之间的差异。
 - git reset --mixed reset 如果不加参数，那么默认使用 --mixed 参数。它的行为是：保留工作目录，并且清空暂存区。也就是说，工作目录的修改、暂存区的内容以及由 reset 所导致的新的文件差异，都会被放进工作目录。简而言之，就是「把所有差异都混合（mixed）放在工作目录中」。
