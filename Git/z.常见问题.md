@@ -95,9 +95,18 @@ git push https://github.com/worldluoji/kafka d96757a3732665deba775538f9d49ff33c3
 <br>
 
 5. fatal: refusing to merge unrelated histories
+
 如果你是git pull或者git push报fatal: refusing to merge unrelated histories
 同理：
 ```
 git pull origin master --allow-unrelated-histories
 ```
 如果有冲突，再解决冲突后提交即可。
+
+<br>
+
+6. 密码变更后，本地保存的密码如何更新
+```
+git config --global --unset credential.helper
+```
+然后再push代码，会让你重输入用户名和密码，这样就更新了。
