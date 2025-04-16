@@ -13,7 +13,7 @@ expires 是一个绝对时间，本地时间可能跟服务器时间不⼀致, �
 - 可以在html页面中添加<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00"/> 来给页面设置缓存时间；
 - 对于图片、css等文件则需要在IIS或者apache等运行容器中进行规则配置来让容器在请求资源的时候添加在responese的header中。
 
-<br>
+---
 
 ## cache-control
 为了解决 expires 绝对时间的问题，http 1.1引入了cache-control, 可以通过max-age设置最大缓存时间：
@@ -23,13 +23,15 @@ expires 是一个绝对时间，本地时间可能跟服务器时间不⼀致, �
 - no-cache，不会被缓存
 - no-store，不能被存储
 
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
+
 如果max-age和expires同时存在，则expires被Cache-Control的max-age覆盖。
 
 此时，expires = max-age + “每次下载时的当前的request时间”。
 
 所以，一旦重新下载的页面后，expires就重新计算一次，但last-modified不会变化。
 
-<br>
+---
 
 ## last-modified
 望文知义，根据这个词条的直译应该是上次修改（时间），通过修改服务器端的文件后再请求，发现response的header中的last-modified改变了。
@@ -52,7 +54,7 @@ expires(cache-control)标识使得浏览器干脆连HTTP请求都不用发。但
 
 所以，last-modified要和expires一起用。
 
-<br>
+---
 
 ## etag
 http 1.1中增加的header，HTTP协议规格说明定义 etag 为“被请求变量的实体值” 。另一种说法是，etag是一个可以与Web资源关联的记号（token）。典型的Web资源可以是一个Web页，但也可能是JSON或XML文档。服务器单独负责判断记号是什么及其含义，并在HTTP响应头中将其传送到客户端。
@@ -72,7 +74,7 @@ http 1.1中增加的header，HTTP协议规格说明定义 etag 为“被请求�
 
 etag和last-modified的情况类似，需要expires控制请求的频率，etag在强制刷新时作为保障。
 
-<br>
+---
 
 ## last-modified和etag
 从资源更新原理来看last-modified和etag基本是类似的，那为什么http协议中要搞2个标识呢？
