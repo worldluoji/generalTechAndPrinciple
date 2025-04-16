@@ -7,7 +7,7 @@ http 1.0中定义的header，是最基础的浏览器缓存处理，表示资源
 
 expires 是一个绝对时间，本地时间可能跟服务器时间不⼀致, 就会导致问题。
 
-<img src="响应标头.PNG" width="500px"/>
+<img src="./assets/响应标头.PNG" width="500px"/>
 
 应用：
 - 可以在html页面中添加<meta http-equiv="Expires" content="Thu, 01 Dec 1994 16:00:00"/> 来给页面设置缓存时间；
@@ -43,6 +43,9 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Contro
 2. 浏览器第二次请求该资源时，根据HTTP协议的规定，浏览器会向服务器传送If-Modified-Since报头(Request Header)，询问该文件是否在指定时间之后有被修改过，格式为：If-Modified-Since:Tue, 24 Feb 2009 08:01:04 GMT
 
 3. 如果服务器端的资源没有变化，则服务器返回304状态码（Not Modified），内容为空，这样就节省了传输数据量。当服务器端代码发生改变，则服务器返回200状态码（ok），内容为请求的资源，和第一次请求资源时类似。从而保证在资源没有修改时不向客户端重复发出资源，也保证当服务器有变化时，客户端能够及时得到最新的资源。
+
+
+<img src="./assets/304 and ma-age.png" />
 
 注意事项：
 - 如果If-Modified-Since的时间比服务器当前时间(当前的请求时间request_time)还晚，会认为是个非法请求;
@@ -84,9 +87,10 @@ last-modified存在的问题：
 - 2. 如果用旧文件覆盖新文件，因为时间更前，浏览器不会请求这个更旧的文件；
 - 3. 时间精度为s级，对文件修改精度有严格要求的场景不能满足。
 
+---
 
 为什么淘宝和腾讯没有使用etag？
 
-<img src="为什么淘宝和腾讯没有使用etag.PNG" width="800px"/>
+<img src="./assets/为什么淘宝和腾讯没有使用etag.PNG" width="800px"/>
 
 从图中看出，nginx生成的etag, 是用“最后修改时间 last-modified + 文件内容长度”来生成etag, 而CDN每次回源都会导致最后修改时间变化（回源是指浏览器在发送请求报文时，响应该请求报文的是源站点的服务器，而不是各节点上的缓存服务器），使用etag就没有意义了，不如直接使用last-modified。
