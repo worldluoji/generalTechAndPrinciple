@@ -113,7 +113,7 @@ python greeter_client.py
 
 这就是一个基本的gRPC服务在Python中的实现流程。你可以根据实际需求扩展服务接口和逻辑。
 
-<br>
+---
 
 ## 字段编号
 在 `.proto` 文件中，`string greeting = 1;` 这一行的数字 `1` 是字段编号（field number）。字段编号在 Protocol Buffers (protobuf) 中扮演着非常重要的角色，它们是用来唯一标识消息中每个字段的整数。这些编号在消息的编码和解码过程中起到关键作用，而且一旦定义之后就不应该更改，因为它们会影响到与该 `.proto` 文件兼容的所有已部署系统的二进制数据格式。
@@ -130,7 +130,7 @@ python greeter_client.py
 
 因此，`greeting = 1;` 表示 `greeting` 字段在消息编码时将会分配编号 `1`，这是它的内部标识符，用户在编码和解析时并不直接接触到这个数字，但它对protobuf的序列化和反序列化过程至关重要。
 
-<br>
+---
 
 ## 优缺点
 ### gRPC的优势
