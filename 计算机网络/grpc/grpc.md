@@ -3,6 +3,8 @@ gRPC是一个高性能、开源和通用的RPC（Remote Procedure Call，远程�
 
 在Python中实现gRPC服务涉及几个关键步骤，包括定义服务接口、生成必要的代码、编写服务器端代码和客户端代码。下面是一个简单的示例来说明如何使用gRPC框架在Python中创建一个服务。
 
+---
+
 ### 第一步：安装gRPC Python库
 
 首先，确保安装了gRPC和protobuf编译器。你可以使用pip安装：
@@ -10,6 +12,8 @@ gRPC是一个高性能、开源和通用的RPC（Remote Procedure Call，远程�
 ```bash
 pip install grpcio grpcio-tools protobuf
 ```
+
+---
 
 ### 第二步：定义服务接口 (.proto 文件)
 
@@ -37,6 +41,8 @@ message HelloReply {
 }
 ```
 
+---
+
 ### 第三步：生成Python代码
 
 使用`grpcio-tools`来生成Python接口代码：
@@ -50,6 +56,10 @@ python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. helloworld.pr
 - --grpc_python_out=.: 类似于上面的选项，但是这里是专门指定生成gRPC服务相关代码（客户端和服务端存根）的输出目录。这些代码允许你用Python实现和调用gRPC服务。
 
 这会在当前目录下生成`helloworld_pb2.py`和`helloworld_pb2_grpc.py`两个文件。
+- xxx_pb2.py：数据模型与序列化，比如 .proto 定义了 message User { string name=1; }，则 xxx_pb2.py 会生成 User 类，可通过 User(name="Alice") 创建对象。
+- xxx_pb2_grpc.py：gRPC服务存根，定义了gRPC服务接口，以及服务端和客户端的实现。包含三类核心对象：XxxStub（客户端存根）​，客户端通过此类调用远程方法；​XxxServicer（服务端基类）​，服务端需继承此类并实现 RPC 方法逻辑；注册函数 add_XxxServicer_to_server()，将服务实现类绑定到 gRPC 服务器。
+
+---
 
 ### 第四步：实现服务端代码
 
@@ -94,6 +104,8 @@ def run():
 if __name__ == '__main__':
     run()
 ```
+
+---
 
 ### 第六步：运行服务和客户端
 
