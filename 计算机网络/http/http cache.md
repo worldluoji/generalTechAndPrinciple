@@ -31,6 +31,27 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Contro
 
 所以，一旦重新下载的页面后，expires就重新计算一次，但last-modified不会变化。
 
+页面配置缓存示例：
+```html
+<!-- 300内直接使用缓存，300后必须验证缓存的有效性 -->
+<meta http-equiv="Cache-Control" content="max-age=300, must-revalidate">
+<!-- 每次都要验证缓存的有效性 -->
+<meta http-equiv="Cache-Control" content="no-cache">
+```
+
+nginx示例：
+```
+location /dynamic-content {
+    # 静态资源缓存1小时，但必须重新验证
+    add_header Cache-Control "max-age=3600, must-revalidate";
+}
+
+location /critical-data {
+    # 关键数据不缓存
+    add_header Cache-Control "no-cache";
+}
+```
+
 ---
 
 ## last-modified
