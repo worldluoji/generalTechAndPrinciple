@@ -20,8 +20,8 @@ expires 是一个绝对时间，本地时间可能跟服务器时间不⼀致, �
 - max-age=num(s)，设置最⼤缓存时间
 - public，缓存能被多⽤户共享
 - private，缓存不能在⽤户间共享
-- no-cache，不会被缓存
-- no-store，不能被存储
+- no-cache，它可以缓存，但用之前必须和服务器确认有效性。
+- no-store，不缓存
 
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
 
