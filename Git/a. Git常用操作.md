@@ -8,15 +8,15 @@ git init初始化git仓库 -> git add file1,file2将文件添加到暂存区 -> 
 
 push之前要先关联git仓库，git remote add origin git仓库地址
 
-<br>
+---
 
 2. 克隆已经仓库： git clone，从github上将已有的库拉取到本地
 
-<br>
+---
 
 3. 查看状态: git status
    
-<br>
+---
 
 4. 修改的文件在工作区 -> git add 工作区修改的文件后在暂存区 -> git commit后到版本库
 Git管理的是“修改”而不是文件内容。这里的修改是指添加一行，删除一行，或改动某一行。
@@ -26,16 +26,16 @@ Git创建分支、合并分支，都使用了C语言中的指针，所以效率�
 
 <img src="./pics/git流程图.png" />
 
-<br>
+---
 
 5. 文件的比较：
 - git diff fileName  比较工作区与暂存区（即上一次add）的对应文件的区别
 - git diff --cached fileName 比较暂存区与版本库上文件的区别，把暂存区理解为一个cache即好记忆
 - git diff HEAD --fileName 比较工作区与版本库上当前版本（HEAD）的区别
+- git diff --staged 比较暂存区与最后一次提交（HEAD）的差异（已暂存的修改）
+- git diff commit1 commit2  比较两次提交的差异
 
-git diff commit1 commit2  比较两次提交的差异
-
-<br>
+---
 
 6. git log
 - git log 查看提交历史
@@ -43,7 +43,7 @@ git diff commit1 commit2  比较两次提交的差异
 - git reflog 查看记录的每一次命令
 - git log --oneline 简洁的查看comitid和提交信息
 
-<br>
+---
 
 7. Git的时候有可能commit提交代码后，发现这一次commit的内容是有错误的, 就要使用git reset命令。
 ```
@@ -61,7 +61,7 @@ git reset [--hard|soft|mixed|merge|keep] [<commit>或HEAD]：将当前的分支�
 补充：
 git reset HEAD readmine.txt 将暂存区中的内容恢复到工作区
 
-<br>
+---
 
 8. git checkout
 (1) git checkout -b test dev 基于dev分支创建test分支并切换到test分支，如果不加dev,就是基于当前分支创建
@@ -79,7 +79,7 @@ origin/test
 (2) git checkout --fileName 丢弃工作区的文件修改，不影响库上版本和暂存区
 比如，git rm fileName删除文件后，如果是误删，就git checkout --fileName就能恢复
 
-<br>
+---
 
 9. git branch 查看当前所在分支
 ```   
@@ -87,18 +87,18 @@ git branch -r 查看远端分支
 git branch -d dev 删除分支dev,  -D则是强制删除，慎用
 ```
 
-<br>
+---
 
 10.  git merge dev 将dev分支合并到当前分支
 
-<br>
+---
 
 11.  git stash保存当前工作区修改的文件，然后去做其它事；做完后git stash pop就能恢复之前的文件，也叫做unstash;
 ```
 git stash list查看当前stash的清单
 ```
 
-<br>
+---
 
 12. git push 把分支推送到远端
 ```
@@ -106,25 +106,25 @@ git push -u origin master
 ```
 加上-u参数，不仅将把本地master分支内容推送到远程master分支，还将它们关联起来，以后push就可以不加-u参数了。
 
-<br>
+---
 
 13.  git pull = git fetch + get merge
 
 git fetch是获取远程最新分支内容到本地分支，但是不会自动merge. 
 
-<br>
+---
 
 14. git tag 标签， 目的是为了标识一个版本
 - git tag v1.0 即把当前节点打上v1.0标签
 - git show v1.0 查看v1.0标签的节点信息
 - git push origin v1.0推送v1.0版本到远端
 
-<br>
+---
 
 15.  git push到远程分支以后的撤回方法
 先使用git reset commitId，回到对应的版本，再强制重新push
 
-<br>
+---
 
 16.  git config --list
 照着下面配置完成后，你可以再试一下该命令，就会出现一系列配置信息。
@@ -133,7 +133,7 @@ git config --global user.name  "username"
 git config --global user.email  "email"
 ```
 
-<br>
+---
 
 17.  Git本地与远程仓库关联和去关联
 (1) 连接远程仓库
