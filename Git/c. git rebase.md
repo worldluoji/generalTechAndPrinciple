@@ -27,6 +27,10 @@ git commit --amend -m 'new commit message' # 直接修改上一次 commit
 ## 二. git rebase
 如果我们想修改的 Commit Message 不是最近一次的 Commit Message，可以通过 git rebase -i <父 commit ID>命令来修改。
 
+快递送货 vs 整理书架：
+- git pull（默认merge）就像快递送货上门——直接把别人的更新打包塞进你的仓库，保留原始提交痕迹；
+- git rebase则像整理书架——把你的修改"挪到"最新代码基础上，让历史记录像一本连贯的书，没有突兀的插入痕迹5。
+
 在 Git 中，`git rebase`主要有以下一些使用场景：
 
 **1、保持线性提交历史**
@@ -61,6 +65,20 @@ $ git rebase master dev
 ```
 它的原理是首先找到这两个分支（即源分支 dev 和目的分支 master）的最近共同祖先 ，然后源分支 dev 对比当前提交相对于该祖先的历次提交，
 提取相应的修改并存为临时文件，接着将源分支 dev 指向目标基底 （master）, 最后依次将之前另存为临时文件的修改依序应用，从而产生了新的节点。
+```
+原始状态：
+A---B---C  feature  ← 你的分支（基于B开发）
+/
+D---E---F---G    main   ← 主分支
+
+执行 git rebase main 后：
+A'---B'---C'  feature  ← 你的提交被"重放"到G之后
+/
+D---E---F---G    main
+```
+- 不是简单复制：你的提交A/B/C会被重新应用到main最新提交G上，形成新提交A'/B'/C'（哈希值已变）4。
+- 冲突处理：若你的修改与main冲突，需逐个解决（如先解决A与G冲突生成A'，再用A'解决B冲突生成B'）3。
+- 基底变更：feature分支的"起点"从B变成了G，后续开发都基于最新代码
 
 最后，回到 master 分支，进行一次快进合并。
 ```
@@ -69,9 +87,9 @@ $ git merge dev
 ```
 这样master分支就到了最新的节点。rebase后的commit记录，会把master的提交记录放在dev的提交记录前面。
 
-<br>
+---
 
-例2：合并多个commit为1个
+例2：交互式合并多个commit为1个
 ```
 git rebase -i [startpoint] [endpoint]
 # startpoint不包含，endpoint包含，前开后闭区间
@@ -172,6 +190,14 @@ Date:   Mon May 27 18:47:30 2019 +0800
 	first commit
 ```
 
+例3: 交互式变基（压缩/修改历史提交）
+```
+git rebase -i HEAD～3
+```
+- 操作：将最近3个提交合并为1个、修改提交信息或删除冗余提交6。
+- 适用：提交PR前"美化"历史，提升代码审查体验。
+
+
 其它常用命令：
 ```
 # 继续之前的rebase： 如果需要解决冲突等原因跳出rebase过程后，还想继续刚才的rebase
@@ -184,7 +210,7 @@ git rebase --abort
 git rebase --edit-todo
 ```
 
-<br>
+---
 
 ## 三. git rebase不适用的情况
 在多人协作的项目中使用 `git rebase` 需要格外谨慎。
@@ -203,7 +229,7 @@ git rebase --edit-todo
 
 总之，在多人协作的 Git 项目中，要牢记<strong>不要对在仓库外有副本的分支执行变基这一准则</strong>，以确保团队的开发工作能够顺利进行，避免不必要的混乱和冲突。
 
-<br>
+---
 
 ## 参考：
 1. https://zhuanlan.zhihu.com/p/80506976
